@@ -14,14 +14,13 @@ The final version of your program is supposed to work from the command line and 
 
 -- type indicates the type of payment: "annuity" or "diff" (differentiated). If --type is specified neither as "annuity" nor as "diff" or not specified at all, show the error message.
 
-`` > python creditcalc.py --principal=1000000 --periods=60 --interest=10 
-Incorrect parameters ``
+`` > python creditcalc.py --principal=1000000 --periods=60 --interest=10 ``
+`` >Incorrect parameters ``
 
 payment is the monthly payment amount. For --type=diff, the payment is different each month, so we can't calculate months or principal, therefore a combination with --payment is invalid, too:
 ``
-> python creditcalc.py --type=diff --principal=1000000 --interest=10 --payment=100000
-> Incorrect parameters
-``
+> python creditcalc.py --type=diff --principal=1000000 --interest=10 --payment=100000 ``
+`` >Incorrect parameters ``
 
 principal is used for calculations of both types of payment. You can get its value if you know the interest, annuity payment, and number of months.
 
@@ -29,22 +28,20 @@ periods denotes the number of months needed to repay the loan. It's calculated b
 
 interest is specified without a percent sign. Note that it can accept a floating-point value. Our loan calculator can't calculate the interest, so it must always be provided. These parameters are incorrect because --interest is missing:
 ``
-> python creditcalc.py --type=annuity --principal=100000 --payment=10400 --periods=8
-Incorrect parameters
-
-``
+> python creditcalc.py --type=annuity --principal=100000 --payment=10400 --periods=8 ``
+`` >Incorrect parameters ``
 
 You may have noticed that for differentiated payments you will need 4 out of 5 parameters (excluding payment), and the same is true for annuity payments (the user will be calculating the number of payments, the payment amount, or the loan principal). Thus, you should also display an error message when fewer than four parameters are provided:
 
 ``
-> python creditcalc.py --type=annuity --principal=1000000 --payment=104000
-Incorrect parameters
-``
+> python creditcalc.py --type=annuity --principal=1000000 --payment=104000 ``
+`` >Incorrect parameters ``
+
 
 You should also display an error message when negative values are entered:
 ``
-> python creditcalc.py --type=diff --principal=30000 --periods=-14 --interest=10
-Incorrect parameters
-``
+> python creditcalc.py --type=diff --principal=30000 --periods=-14 --interest=10 ``
+``Incorrect parameters``
+
 
 The only thing left is to compute the overpayment: the amount of interest paid over the whole term of the loan. Voila: you have a real loan calculator!
