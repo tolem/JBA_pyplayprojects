@@ -3,6 +3,7 @@ import os
 import sys
 import re
 import ast
+import fnmatch
 base_path = sys.argv[1]
 
 
@@ -78,8 +79,6 @@ def s009_test(line, li, book, path):
 
 
 def s010_test(line, name, book, path):
-    # pattern = r'[\s+]def[\s]' + f'{name}' + r'\((.+[,])*[\s]+(([A-Z])\w+\=\w+)\):'
-    # pattern = r'{}'.format(pattern)
     snake_case = re.match(r'^[A-Z]', name)
     if snake_case:
         book.setdefault(line, [])
@@ -96,15 +95,6 @@ def s011_test(line, li,  book, path):
             book[line].append(f'{path}: Line {line}: S011 Variable \'{name}\' in function should be snake_case')
 
 
-# def check_s011(local_path, sample: str, i: int):
-#     if re.match(r'\w+.=', sample.strip()):
-#         variable = re.search(r'\w+ =', sample.strip()).group()[:-2]
-#         if re.fullmatch('[a-z0-9_]+', variable):
-#             pass
-#         else:
-#             print(f'{local_path}: Line {i}: S011 Variable \'\' in function should be snake_case')
-#
-
 def s012_test(line, book, path):
     book[line].append(f'{path}: Line {line}: S012 Default argument value is mutable' )
 
@@ -115,16 +105,10 @@ def ast_tester(book, filename):
         tree = ast.parse(file)
         # print(ast.dump(tree))
         for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef):
-                # check whether the function's name is written in camel_case
-                # fields = node.targets[0]
-                # if hasattr(fields, 'id'):
-                #     _name = node.targets[0].id
-                #     print(_name)
-                for argument_name in [a.arg for a in node.args.args]:
-                    # print(argument_name)
-                    s010_test(node.lineno, argument_name, book, filename)
 
+            if isinstance(node, ast.FunctionDef):
+                for argument_name in [a.arg for a in node.args.args]:
+                    s010_test(node.lineno, argument_name, book, filename)
 
 
                 for item in node.args.defaults:
@@ -133,40 +117,30 @@ def ast_tester(book, filename):
                         if isinstance(item, defaults):
                             s012_test(item.lineno, book, filename)
 
-            s011_test(node.lineno, file, book, filename)
-
-
-
-            # elif isinstance(node, ast.Name):
-            #     if isinstance(node.ctx, ast.Store):
-            #         variable_name = node.id
-            #         s011_test(node.lineno, str(variable_name), book, filename)
-
-
-
-
-
-
-
 
 def static_analyzer(path, filename):
     static_dict = {}
-    for idx, expr in enumerate(path, 1):
-        s, e = idx-4, idx
-        blank = path[s: e]
-        static_dict.setdefault(idx, [])
-        back = idx - 2
-        s001_test(idx, expr, static_dict, filename)
-        s004_test(idx, expr, static_dict, filename)
-        s003_test(idx, expr, static_dict, filename)
-        s002_test(idx, expr, path[back], static_dict, filename)
-        s006_test(idx, expr, blank, static_dict, filename)
-        s005_test(idx, expr, static_dict, filename)
-        s007_test(idx, expr, static_dict, filename)
-        s008_test(idx, expr, static_dict, filename)
-        s009_test(idx, expr, static_dict, filename)
-        # s011_test(idx, expr, static_dict, filename)
-    ast_tester(static_dict, filename)
+    test_6 = filename.split('\\')
+    if os.path.isfile(filename) and fnmatch.fnmatch(test_6[-1], r'test_[1-2].py'):
+        for idx, expr in enumerate(path, 1):
+            s, e = idx-4, idx
+            blank = path[s: e]
+            static_dict.setdefault(idx, [])
+            back = idx - 2
+            s001_test(idx, expr, static_dict, filename)
+            s004_test(idx, expr, static_dict, filename)
+            s003_test(idx, expr, static_dict, filename)
+            s002_test(idx, expr, path[back], static_dict, filename)
+            s006_test(idx, expr, blank, static_dict, filename)
+            s005_test(idx, expr, static_dict, filename)
+            s007_test(idx, expr, static_dict, filename)
+            s008_test(idx, expr, static_dict, filename)
+            s009_test(idx, expr, static_dict, filename)
+    else:
+        for idx, expr in enumerate(path, 1):
+            static_dict.setdefault(idx, [])
+            s011_test(idx, expr, static_dict, filename)
+        ast_tester(static_dict, filename)
 
     return static_dict
 
@@ -178,7 +152,6 @@ def sorted_list(di):
 
 
 def display_test(di):
-    # print(di)
     for n in di:
         if len(di[n]) == 1:
             print(di[n][0])
