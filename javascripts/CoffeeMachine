@@ -1,0 +1,23 @@
+// Use "input()" to input a line from the user
+// Use "input(str)" to print some text before requesting input
+// You will need this in the following stages
+const input = require('sync-input')
+let availableWater = input("Write how many ml of water the coffee machine has: ");
+let availableMilk = input("Write how many ml of milk the coffee machine has: ");
+let availableCoffee = input("Write how many grams of coffee beans the coffee machine has: ");
+let cupsCoffee = input("Write how many cups of coffee you will need: ");
+
+console.log(calculateCoffeeCups(availableWater, availableMilk, availableCoffee, cupsCoffee));
+
+function calculateCoffeeCups(currentWater, currentMilk, currentCoffee, desiredCups) {
+    let possibleCups = Math.min(Math.floor(currentWater / 200), Math.floor(currentMilk / 50), Math.floor(currentCoffee / 15));
+
+    if (desiredCups == possibleCups) {
+        return "Yes, I can make that amount of coffee";
+    } else if (possibleCups > desiredCups) {
+        let result = possibleCups - desiredCups;
+        console.log(`Yes, I can make that amount of coffee (and even ${result} more than that)`);
+    } else {
+        return "No, I can make only " + possibleCups + " cups of coffee";
+    }
+}
