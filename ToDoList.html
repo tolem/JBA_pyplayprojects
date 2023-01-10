@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-Do List</title>
+
+    <link rel="stylesheet" href="style.css" />
+    <style> 
+    * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 5rem auto;
+    width: 90vw;
+}
+
+h1 {
+    font-size: 2.4rem;
+    font-weight: normal;
+}
+
+#new-task {
+    display: flex;
+    width: 50%;
+    margin: 1.5rem 0;
+}
+
+#input-task {
+    flex: 3;
+    border: none;
+    border-bottom: 2px solid #6b5d78;
+    font: 1.1rem "Arial", sans-serif;
+    padding: .5rem .5rem;
+}
+
+#add-task-button {
+    flex: 1;
+    border: none;
+    background: #c8b8dd;
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    margin-left: 10px;
+}
+
+#task-list {
+    list-style: none;
+    width: 50%;
+}
+
+#task-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 2.5rem;
+}
+
+.check {
+    cursor: pointer;
+    width: 1rem;
+    height: 1rem;
+}
+
+.check:checked + span {
+    text-decoration: line-through;
+}
+
+.task {
+    flex: 2;
+    font-size: 1.2rem;
+    margin-left: 1rem;
+}
+
+/* Could use FontAwesome, but it's not worth for one btn */
+.delete-btn {
+    background: red;
+    border: none;
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+    width: 1.4rem;
+    height: 1.4rem;
+}
+
+.delete-btn::after {
+    content: "\00d7";
+    position: relative;
+    font-size: x-large;
+    top: -10%;
+}
+    </style>
+</head>
+<body>
+<main>
+    <h1>To-Do List</h1>
+
+    <div id="new-task">
+        <input type="text" id="input-task" />
+        <button id="add-task-button">Add Task</button>
+    </div>
+
+    <ul id="task-list"></ul>
+</main>
+
+<script src="script.js">
+const addTaskBtn = document.getElementById("add-task-button");
+const inputTask = document.getElementById("input-task");
+const taskList = document.getElementById("task-list");
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+taskList.addEventListener("click", function (event) {
+    if (event.target.type === "checkbox") {
+        toggleDone(event.target.parentElement.getAttribute("data-key"));
+    }
+
+    if (event.target.classList.contains("delete-btn")) {
+        removeTask(event.target.parentElement.getAttribute("data-key"));
+    }
+});
+
+addTaskBtn.addEventListener("click", function () {
+    addTask();
+});
+
+function updateTasks() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    renderTasks();
+}
+
+function renderTasks() {
+    taskList.innerHTML = "";
+
+    for (let task of tasks) {
+        const checked = task.isDone ? "checked" : "";
+        const li = document.createElement("li");
+        li.setAttribute("data-key", task.id);
+        li.innerHTML = `<input type="checkbox" class="check" ${checked} /><span class="task">${task.taskText}</span><button class="delete-btn"></button>`;
+        taskList.appendChild(li);
+    }
+}
+
+function addTask() {
+    if (inputTask.value) {
+        const task = {
+            id: Date.now(),
+            taskText: (taskText = inputTask.value),
+            isDone: false,
+        };
+
+        tasks.push(task);
+        updateTasks();
+        inputTask.value = "";
+    }
+}
+
+function removeTask(id) {
+    tasks = tasks.filter(function (task) {
+        return task.id != id;
+    });
+    updateTasks();
+}
+
+function toggleDone(id) {
+    for (let task of tasks) {
+        if (task.id == id) {
+            task.isDone = task.isDone ? false : true;
+            break;
+        }
+    }
+    updateTasks();
+}
+
+renderTasks();
+</script>
+</body>
+</html>
